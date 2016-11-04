@@ -211,5 +211,33 @@
   
   <target name="build.modules" depends="init, clean, compile.module.hsa" description="build all modules"/>
   
-  <target name="all" depends="build.modules" description="build all"/>
+  <target name="init.artifacts">
+    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+    <property name="artifact.output.hsa:jar" value="${basedir}/out/artifacts/HSA_jar"/>
+    <mkdir dir="${artifacts.temp.dir}"/>
+    <property name="temp.jar.path.HSA.jar" value="${artifacts.temp.dir}/HSA.jar"/>
+  </target>
+  
+  <target name="artifact.hsa:jar" depends="init.artifacts, compile.module.hsa" description="Build &#39;HSA:jar&#39; artifact">
+    <property name="artifact.temp.output.hsa:jar" value="${artifacts.temp.dir}/HSA_jar"/>
+    <mkdir dir="${artifact.temp.output.hsa:jar}"/>
+    <jar destfile="${temp.jar.path.HSA.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset dir="${hsa.output.dir}"/>
+      <zipfileset src="${basedir}/../../Documents/library/commons-io-2.4/commons-io-2.4.jar"/>
+      <zipfileset src="${basedir}/../../Documents/library/apache-log4j-1.2.17/log4j-1.2.17.jar"/>
+    </jar>
+    <copy file="${temp.jar.path.HSA.jar}" tofile="${artifact.temp.output.hsa:jar}/HSA.jar"/>
+  </target>
+  
+  <target name="build.all.artifacts" depends="artifact.hsa:jar" description="Build all artifacts">
+    <mkdir dir="${artifact.output.hsa:jar}"/>
+    <copy todir="${artifact.output.hsa:jar}">
+      <fileset dir="${artifact.temp.output.hsa:jar}"/>
+    </copy>
+    
+    <!-- Delete temporary files -->
+    <delete dir="${artifacts.temp.dir}"/>
+  </target>
+  
+  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
 </project>
